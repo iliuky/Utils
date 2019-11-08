@@ -111,6 +111,27 @@ namespace Ares.Quartz.Extensions
         }
 
         /// <summary>
+        /// 配置执行需要执行的作业
+        /// </summary>
+        /// <param name="cron">cron 表达式</param>
+        /// <typeparam name="T">IJob</typeparam>
+        public void ScheduleJob<T>(ServiceLifetime serviceLifetime, Action<SimpleScheduleBuilder> action, bool isStartNow = false) where T : class, IJob
+        {
+            var name = typeof(T).FullName;
+            var job = JobBuilder.Create<T>().WithIdentity(name, "jobs").Build();
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("trigger_" + name, "jobs")
+                .WithSimpleSchedule(action);
+
+            if (isStartNow)
+            {
+                trigger = trigger.StartNow();
+            }
+
+            _jobs.Add(new QuartzJobConfig { JobType = typeof(T), JobDetail = job, Trigger = trigger.Build(), ServiceLifetime = serviceLifetime });
+        }
+
+        /// <summary>
         /// 调试执行作业
         /// </summary>
         /// <param name="ignore">忽视所有参数, 只执行一次作业</param>
