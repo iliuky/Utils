@@ -67,6 +67,5 @@ namespace Ares.Common.Utils
         }
 
         #endregion
-
     }
 }
